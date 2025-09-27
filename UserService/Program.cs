@@ -5,8 +5,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services
 builder.Services.AddControllers();
+
+var connectionString = builder.Configuration.GetConnectionString("Default") ?? "Data Source=users.db";
 builder.Services.AddDbContext<UserContext>(options =>
-    options.UseSqlite("Data Source=users.db"));
+    options.UseSqlite(connectionString));
 
 var app = builder.Build();
 

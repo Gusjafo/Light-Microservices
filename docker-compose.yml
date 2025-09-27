@@ -1,0 +1,51 @@
+version: "3.9"
+
+services:
+  user-service:
+    build:
+      context: ./UserService
+      dockerfile: Dockerfile
+    container_name: user-service
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__Default=Data Source=/data/users.db
+    volumes:
+      - user_data:/data
+    ports:
+      - "5001:80"
+
+  product-service:
+    build:
+      context: ./ProductService
+      dockerfile: Dockerfile
+    container_name: product-service
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__Default=Data Source=/data/products.db
+    volumes:
+      - product_data:/data
+    ports:
+      - "5003:80"
+
+  order-service:
+    build:
+      context: ./OrderService
+      dockerfile: Dockerfile
+    container_name: order-service
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__Default=Data Source=/data/orders.db
+      - Services__User=http://user-service
+      - Services__Product=http://product-service
+    depends_on:
+      - user-service
+      - product-service
+    volumes:
+      - order_data:/data
+    ports:
+      - "5005:80"
+
+volumes:
+  user_data:
+  product_data:
+  order_data:
