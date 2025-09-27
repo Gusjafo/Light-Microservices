@@ -1,3 +1,5 @@
+using System;
+using System.Threading;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using UserService.Data;
@@ -13,26 +15,39 @@ public class UsersController(UserContext context) : ControllerBase
 
     // GET: api/users
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<User>>> GetUsers()
+    public async Task<ActionResult<IEnumerable<User>>> GetUsers(CancellationToken ct)
     {
-        return await _context.Users.ToListAsync();
+        var users = await _context.Users
+            .AsNoTracking()
+            .ToListAsync(ct);
+
+        return Ok(users);
     }
 
     // GET: api/users/1
-    [HttpGet("{id}")]
-    public async Task<ActionResult<User>> GetUser(int id)
+    [HttpGet("{id:guid}")]
+    public async Task<ActionResult<User>> GetUser(Guid id, CancellationToken ct)
     {
-        var user = await _context.Users.FindAsync(id);
-        if (user == null) return NotFound();
-        return user;
+        var user = await _context.Users
+            .AsNoTracking()
+            .FirstOrDefaultAsync(u => u.Id == id, ct);
+
+        if (user is null) return NotFound();
+
+        return Ok(user);
     }
 
     // POST: api/users
     [HttpPost]
-    public async Task<ActionResult<User>> CreateUser(User user)
+    public async Task<ActionResult<User>> CreateUser(User user, CancellationToken ct)
     {
+        if (user.Id == Guid.Empty)
+        {
+            user.Id = Guid.NewGuid();
+        }
+
         _context.Users.Add(user);
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(ct);
         return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
     }
 }

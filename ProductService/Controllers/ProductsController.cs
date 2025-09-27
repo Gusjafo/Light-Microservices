@@ -1,3 +1,5 @@
+using System;
+using System.Threading;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProductService.Data;
@@ -13,26 +15,39 @@ public class ProductsController(ProductContext context) : ControllerBase
 
     // GET: api/products
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Product>>> GetProducts()
+    public async Task<ActionResult<IEnumerable<Product>>> GetProducts(CancellationToken ct)
     {
-        return await _context.Products.ToListAsync();
+        var products = await _context.Products
+            .AsNoTracking()
+            .ToListAsync(ct);
+
+        return Ok(products);
     }
 
     // GET: api/products/1
-    [HttpGet("{id}")]
-    public async Task<ActionResult<Product>> GetProduct(int id)
+    [HttpGet("{id:guid}")]
+    public async Task<ActionResult<Product>> GetProduct(Guid id, CancellationToken ct)
     {
-        var product = await _context.Products.FindAsync(id);
-        if (product == null) return NotFound();
-        return product;
+        var product = await _context.Products
+            .AsNoTracking()
+            .FirstOrDefaultAsync(p => p.Id == id, ct);
+
+        if (product is null) return NotFound();
+
+        return Ok(product);
     }
 
     // POST: api/products
     [HttpPost]
-    public async Task<ActionResult<Product>> CreateProduct(Product product)
+    public async Task<ActionResult<Product>> CreateProduct(Product product, CancellationToken ct)
     {
+        if (product.Id == Guid.Empty)
+        {
+            product.Id = Guid.NewGuid();
+        }
+
         _context.Products.Add(product);
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(ct);
         return CreatedAtAction(nameof(GetProduct), new { id = product.Id }, product);
     }
 }
