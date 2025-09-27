@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using OrderService.Data;
 using OrderService.External;
@@ -57,6 +58,10 @@ builder.Services.AddHttpClient<IProductServiceClient, ProductServiceClient>((sp,
 builder.Services.AddScoped<IOrderCreationService, OrderCreationService>();
 
 var app = builder.Build();
+
+using var scope = app.Services.CreateScope();
+var context = scope.ServiceProvider.GetRequiredService<OrderContext>();
+context.Database.Migrate();
 
 app.MapControllers();
 app.Run();
