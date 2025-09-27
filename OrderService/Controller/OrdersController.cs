@@ -1,43 +1,27 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using OrderService.Data;
 using OrderService.Models;
+using OrderService.Services;
 
 namespace OrderService.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class OrdersController : ControllerBase
+public class OrdersController(IOrderCreationService service) : ControllerBase
 {
-    private readonly OrderContext _context;
+    private readonly IOrderCreationService _service = service;
 
-    public OrdersController(OrderContext context)
-    {
-        _context = context;
-    }
-
-    // GET: api/orders
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<Order>>> GetOrders()
-    {
-        return await _context.Orders.ToListAsync();
-    }
-
-    // GET: api/orders/1
-    [HttpGet("{id}")]
-    public async Task<ActionResult<Order>> GetOrder(int id)
-    {
-        var order = await _context.Orders.FindAsync(id);
-        if (order == null) return NotFound();
-        return order;
-    }
-
-    // POST: api/orders
     [HttpPost]
-    public async Task<ActionResult<Order>> CreateOrder(Order order)
+    public async Task<IActionResult> Create([FromBody] CreateOrderRequest req, CancellationToken ct)
     {
-        _context.Orders.Add(order);
-        await _context.SaveChangesAsync();
-        return CreatedAtAction(nameof(GetOrder), new { id = order.Id }, order);
+        var (ok, error, order) = await _service.CreateAsync(req.UserId, req.ProductId, req.Quantity, ct);
+        if (!ok) return BadRequest(new { error });
+        return CreatedAtAction(nameof(GetById), new { id = order!.Id }, order);
+    }
+
+    [HttpGet("{id:guid}")]
+    public async Task<IActionResult> GetById([FromRoute] Guid id, CancellationToken ct)
+    {
+        var order = await _service.GetAsync(id, ct);
+        return order is null ? NotFound() : Ok(order);
     }
 }

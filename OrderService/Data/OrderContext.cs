@@ -3,9 +3,7 @@ using OrderService.Models;
 
 namespace OrderService.Data;
 
-public class OrderContext : DbContext
+public class OrderContext(DbContextOptions<OrderContext> options) : DbContext(options)
 {
-    public OrderContext(DbContextOptions<OrderContext> options) : base(options) { }
-
     public DbSet<Order> Orders { get; set; }
 }

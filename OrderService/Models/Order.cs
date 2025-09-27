@@ -2,9 +2,9 @@ namespace OrderService.Models;
 
 public class Order
 {
-    public int Id { get; set; }              // Primary key
-    public int UserId { get; set; }          // FK reference to User Service
-    public int ProductId { get; set; }       // FK reference to Product Service
-    public int Quantity { get; set; }
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public Guid Id { get; set; } = Guid.NewGuid();
+        public Guid UserId { get; set; }
+        public Guid ProductId { get; set; }
+        public int Quantity { get; set; }
+        public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
 }
