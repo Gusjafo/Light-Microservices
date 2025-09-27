@@ -1,0 +1,54 @@
+# Build results
+bin/
+obj/
+out/
+*.exe
+*.dll
+*.pdb
+*.cache
+*.log
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Rider / JetBrains IDEs
+.idea/
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# NuGet
+*.nupkg
+*.snupkg
+packages/
+*.nuspec
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Dotnet Tools
+.dotnet-tools.json
+
+# Entity Framework Migrations (keep if you want to version them)
+# !Migrations/
+
+# Databases (local only)
+# *.db
+
+# Logs
+*.log
+Logs/
+
+# User-specific
+*.swp
+*.userosscache
+*.sln.docstates
+
+# Temporary
+*.tmp
+*.temp
+*.bak
+*.Backup
