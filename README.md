@@ -74,6 +74,16 @@ cd OrderService
 dotnet run
 ```
 
+### 🐳 Running with Docker Compose
+
+To start all services together with persistent SQLite databases, use Docker Compose from the project root:
+
+```bash
+docker compose up --build
+```
+
+Database files are stored on the host inside the `data/` directory (one subfolder per service), so they survive container restarts.
+
 ---
 
 ## 🔎 Endpoints
