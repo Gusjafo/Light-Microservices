@@ -5,13 +5,15 @@
 
 .app-sidenav {
   width: 280px;
-  background: linear-gradient(165deg, #0f172a 0%, #111827 55%, #0b1120 100%);
-  color: #e5e7eb;
+  background: linear-gradient(160deg, #f8fafc 0%, #e0f2fe 55%, #dbeafe 100%);
+  color: #0f172a;
   padding: 28px 16px;
   display: flex;
   flex-direction: column;
   gap: 24px;
-  box-shadow: 18px 0 40px rgba(15, 23, 42, 0.2);
+  box-shadow: 18px 0 40px rgba(148, 163, 184, 0.3);
+  border-right: 1px solid rgba(148, 163, 184, 0.35);
+  overflow-x: hidden;
 }
 
 .sidenav-header {
@@ -27,15 +29,15 @@
   width: 52px;
   height: 52px;
   border-radius: 16px;
-  background: radial-gradient(circle at top, rgba(96, 165, 250, 0.35), rgba(129, 140, 248, 0.15));
-  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: radial-gradient(circle at top, rgba(59, 130, 246, 0.12), rgba(147, 197, 253, 0.1));
+  border: 1px solid rgba(148, 163, 184, 0.25);
 }
 
 .brand-icon mat-icon {
   font-size: 28px;
   width: 28px;
   height: 28px;
-  color: #93c5fd;
+  color: #2563eb;
 }
 
 .brand-text {
@@ -52,7 +54,7 @@
 .brand-subtitle {
   font-size: 0.75rem;
   text-transform: uppercase;
-  color: rgba(226, 232, 240, 0.6);
+  color: rgba(30, 64, 175, 0.6);
   letter-spacing: 0.25em;
 }
 
@@ -72,13 +74,13 @@ a.mat-mdc-list-item {
   margin: 2px 8px;
   padding: 0 18px;
   border-radius: 12px;
-  color: inherit;
+  color: rgba(15, 23, 42, 0.8);
   transition: background 150ms ease, color 150ms ease, box-shadow 150ms ease;
 }
 
 a.mat-mdc-list-item .mat-mdc-list-item-icon mat-icon,
 a.mat-mdc-list-item mat-icon[matListItemIcon] {
-  color: rgba(226, 232, 240, 0.68);
+  color: rgba(37, 99, 235, 0.7);
   margin-right: 16px;
   transition: color 150ms ease;
 }
@@ -88,19 +90,20 @@ a.mat-mdc-list-item span[matListItemTitle] {
 }
 
 a.mat-mdc-list-item:hover {
-  background: rgba(148, 163, 184, 0.12);
+  background: rgba(59, 130, 246, 0.1);
+  color: #1d4ed8;
 }
 
 a.mat-mdc-list-item.is-active,
 a.mat-mdc-list-item.active-link {
-  background: linear-gradient(135deg, #2563eb, #7c3aed);
-  box-shadow: 0 12px 32px rgba(37, 99, 235, 0.35);
-  color: #f8fafc;
+  background: linear-gradient(135deg, #2563eb, #7dd3fc);
+  box-shadow: 0 12px 32px rgba(59, 130, 246, 0.2);
+  color: #0b1120;
 }
 
 a.mat-mdc-list-item.is-active mat-icon,
 a.mat-mdc-list-item.active-link mat-icon {
-  color: #f8fafc;
+  color: #0b1120;
 }
 
 .app-toolbar {
@@ -168,8 +171,9 @@ a.mat-mdc-list-item.active-link mat-icon {
 }
 
 .table-container {
-  overflow: auto;
-  border-radius: 14px;
+  overflow-x: auto;
+  border-radius: 18px;
+  backdrop-filter: blur(6px);
 }
 
 .full-width-table {
