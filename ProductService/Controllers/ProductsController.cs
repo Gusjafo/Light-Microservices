@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -49,5 +50,34 @@ public class ProductsController(ProductContext context) : ControllerBase
         _context.Products.Add(product);
         await _context.SaveChangesAsync(ct);
         return CreatedAtAction(nameof(GetProduct), new { id = product.Id }, product);
+    }
+
+    // PUT: api/products/{id}
+    [HttpPut("{id:guid}")]
+    public async Task<IActionResult> UpdateProduct(Guid id, Product updatedProduct, CancellationToken ct)
+    {
+        var product = await _context.Products.FirstOrDefaultAsync(p => p.Id == id, ct);
+        if (product is null) return NotFound();
+
+        product.Name = updatedProduct.Name;
+        product.Price = updatedProduct.Price;
+        product.Stock = updatedProduct.Stock;
+
+        await _context.SaveChangesAsync(ct);
+
+        return NoContent();
+    }
+
+    // DELETE: api/products/{id}
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> DeleteProduct(Guid id, CancellationToken ct)
+    {
+        var product = await _context.Products.FirstOrDefaultAsync(p => p.Id == id, ct);
+        if (product is null) return NotFound();
+
+        _context.Products.Remove(product);
+        await _context.SaveChangesAsync(ct);
+
+        return NoContent();
     }
 }

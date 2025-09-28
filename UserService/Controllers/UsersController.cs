@@ -66,4 +66,36 @@ public class UsersController(UserContext context, IPublishEndpoint publishEndpoi
 
         return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
     }
+
+    // PUT: api/users/{id}
+    [HttpPut("{id:guid}")]
+    public async Task<IActionResult> UpdateUser(Guid id, User updatedUser, CancellationToken ct)
+    {
+        var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == id, ct);
+        if (existingUser is null) return NotFound();
+
+        existingUser.Name = updatedUser.Name;
+        existingUser.Email = updatedUser.Email;
+
+        await _context.SaveChangesAsync(ct);
+
+        _logger.LogInformation("User {UserId} updated.", id);
+
+        return NoContent();
+    }
+
+    // DELETE: api/users/{id}
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> DeleteUser(Guid id, CancellationToken ct)
+    {
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == id, ct);
+        if (user is null) return NotFound();
+
+        _context.Users.Remove(user);
+        await _context.SaveChangesAsync(ct);
+
+        _logger.LogInformation("User {UserId} deleted.", id);
+
+        return NoContent();
+    }
 }
