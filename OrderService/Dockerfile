@@ -2,11 +2,15 @@
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
-COPY OrderService.csproj ./
-RUN dotnet restore
+# Copy project files first to leverage Docker layer caching
+COPY OrderService/OrderService.csproj OrderService/
+COPY Contracts/Contracts.csproj Contracts/
+RUN dotnet restore OrderService/OrderService.csproj
 
-COPY . ./
-RUN dotnet publish -c Release -o /app/publish /p:UseAppHost=false
+# Copy the remaining source code
+COPY OrderService/. OrderService/
+COPY Contracts/. Contracts/
+RUN dotnet publish OrderService/OrderService.csproj -c Release -o /app/publish /p:UseAppHost=false
 
 # Runtime stage
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final
