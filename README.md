@@ -84,6 +84,15 @@ docker compose up --build
 
 Database files are stored on the host inside the `data/` directory (one subfolder per service), so they survive container restarts.
 
+> **RabbitMQ Dashboard** — Once Compose is running, open http://localhost:15672 (default user/password: `guest`/`guest`) to inspect queues, messages, and consumers that MassTransit creates.
+
+### 🐇 RabbitMQ & MassTransit Setup
+
+- Docker Compose spins up a dedicated `rabbitmq:3-management` container alongside the APIs.
+- `OrderService` publishes an `OrderCreatedEvent` (via MassTransit) whenever an order is persisted.
+- `ProductService` hosts a MassTransit consumer that listens for `OrderCreatedEvent` and decrements product stock.
+- Connection settings can be overridden via `RabbitMq__*` environment variables (see `appsettings.Development.json` for local defaults).
+
 ---
 
 ## 🔎 Endpoints
@@ -121,8 +130,7 @@ Example request:
 { "userId": "GUID", "productId": "GUID", "quantity": 2 }
 ```
 
-⚠️ Currently, Order Service only stores **userId** and **productId**.  
-In the next step, it will **call User & Product Services** to validate them before creating an order.
+ℹ️ Orders are created synchronously over HTTP. After persistence the service publishes an `OrderCreatedEvent`, which triggers Product Service to adjust inventory.
 
 ---
 
@@ -137,19 +145,28 @@ graph TD
 
 ---
 
-## 📌 Step 2: Service Communication (Next)
+## 📌 Step 2: Service Communication (REST)
 
-Next, we’ll make the **Order Service** communicate with others using **REST APIs**:
+The **Order Service** now orchestrates synchronous validations via **REST APIs**:
 
-- ✅ Check user exists in User Service  
-- ✅ Check product exists & stock is sufficient in Product Service  
-- ✅ Add **resilience** with Polly (retry, circuit breaker)  
+- ✅ Checks the user exists in User Service
+- ✅ Fetches product details & stock from Product Service
+- ✅ Uses Polly policies (retry & circuit breaker) for resilience when calling external APIs
+
+## 🚀 Step 4: Event-Driven Choreography
+
+To remove tight coupling after an order is placed we introduced RabbitMQ + MassTransit:
+
+1. Order API saves the order and publishes an `OrderCreatedEvent`.
+2. Product Service consumes the event and decrements inventory.
+3. RabbitMQ keeps a durable queue so no order events are lost if Product Service is offline temporarily.
+4. You can watch the message flow via the management UI at http://localhost:15672.
 
 ### Future Topics
-- API Gateway (single entry point)  
-- Async messaging (RabbitMQ / Kafka)  
-- Docker & Docker Compose  
-- Deployment to cloud  
+- API Gateway (single entry point)
+- Additional asynchronous workflows (refunds, restocking, etc.)
+- Docker & Docker Compose optimisations
+- Deployment to cloud
 
 ---
 
@@ -179,7 +196,7 @@ Next, we’ll make the **Order Service** communicate with others using **REST AP
    { "name": "Laptop", "price": 1200.00, "stock": 5 }
    ```
 
-3. **Create an order**  
+3. **Create an order**
    Use the `userId` and `productId` from the responses above:
 
    ```http
@@ -188,6 +205,17 @@ Next, we’ll make the **Order Service** communicate with others using **REST AP
 
    { "userId": "GUID", "productId": "GUID", "quantity": 2 }
    ```
+
+4. **Verify stock was decremented asynchronously**
+   ```http
+   GET http://localhost:5003/api/products/{productId}
+   ```
+   The `stock` value should be reduced by the ordered quantity once the message is processed.
+
+5. **Inspect RabbitMQ (optional)**
+   - Navigate to http://localhost:15672
+   - Login with `guest` / `guest`
+   - Check the queue generated for `OrderCreatedConsumer` (kebab-case name) to confirm published/consumed messages.
 
 ---
 

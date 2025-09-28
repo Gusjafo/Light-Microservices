@@ -1,6 +1,13 @@
 version: "3.9"
 
 services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
   user-service:
     build:
       context: ./UserService
@@ -22,10 +29,16 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ConnectionStrings__Default=Data Source=/data/products.db
+      - RabbitMq__Host=rabbitmq
+      - RabbitMq__VirtualHost=/
+      - RabbitMq__Username=guest
+      - RabbitMq__Password=guest
     volumes:
       - ./data/product-service:/data
     ports:
       - "5003:80"
+    depends_on:
+      - rabbitmq
 
   order-service:
     build:
@@ -37,9 +50,14 @@ services:
       - ConnectionStrings__Default=Data Source=/data/orders.db
       - Services__User=http://user-service
       - Services__Product=http://product-service
+      - RabbitMq__Host=rabbitmq
+      - RabbitMq__VirtualHost=/
+      - RabbitMq__Username=guest
+      - RabbitMq__Password=guest
     depends_on:
       - user-service
       - product-service
+      - rabbitmq
     volumes:
       - ./data/order-service:/data
     ports:
