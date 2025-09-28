@@ -26,6 +26,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatDividerModule } from '@angular/material/divider';
 
 @NgModule({
   declarations: [
@@ -56,7 +57,8 @@ import { MatChipsModule } from '@angular/material/chips';
     MatSelectModule,
     MatProgressSpinnerModule,
     MatButtonToggleModule,
-    MatChipsModule
+    MatChipsModule,
+    MatDividerModule
   ],
   providers: [],
   bootstrap: [AppComponent]

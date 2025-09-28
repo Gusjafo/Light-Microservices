@@ -1,40 +1,175 @@
 .app-shell {
   height: 100vh;
+  background: transparent;
 }
 
 .app-sidenav {
-  width: 260px;
+  width: 280px;
+  background: linear-gradient(165deg, #0f172a 0%, #111827 55%, #0b1120 100%);
+  color: #e5e7eb;
+  padding: 28px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  box-shadow: 18px 0 40px rgba(15, 23, 42, 0.2);
+}
+
+.sidenav-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 12px 8px;
+}
+
+.brand-icon {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: radial-gradient(circle at top, rgba(96, 165, 250, 0.35), rgba(129, 140, 248, 0.15));
+  border: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+.brand-icon mat-icon {
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
+  color: #93c5fd;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.brand-title {
+  font-size: 1.25rem;
+}
+
+.brand-subtitle {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: rgba(226, 232, 240, 0.6);
+  letter-spacing: 0.25em;
+}
+
+mat-divider {
+  background-color: rgba(148, 163, 184, 0.35);
+}
+
+mat-nav-list {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+a.mat-mdc-list-item {
+  height: 48px;
+  margin: 2px 8px;
+  padding: 0 18px;
+  border-radius: 12px;
+  color: inherit;
+  transition: background 150ms ease, color 150ms ease, box-shadow 150ms ease;
+}
+
+a.mat-mdc-list-item .mat-mdc-list-item-icon mat-icon,
+a.mat-mdc-list-item mat-icon[matListItemIcon] {
+  color: rgba(226, 232, 240, 0.68);
+  margin-right: 16px;
+  transition: color 150ms ease;
+}
+
+a.mat-mdc-list-item span[matListItemTitle] {
+  font-weight: 500;
+}
+
+a.mat-mdc-list-item:hover {
+  background: rgba(148, 163, 184, 0.12);
+}
+
+a.mat-mdc-list-item.is-active,
+a.mat-mdc-list-item.active-link {
+  background: linear-gradient(135deg, #2563eb, #7c3aed);
+  box-shadow: 0 12px 32px rgba(37, 99, 235, 0.35);
+  color: #f8fafc;
+}
+
+a.mat-mdc-list-item.is-active mat-icon,
+a.mat-mdc-list-item.active-link mat-icon {
+  color: #f8fafc;
 }
 
 .app-toolbar {
   position: sticky;
   top: 0;
   z-index: 2;
+  display: flex;
+  align-items: center;
+  padding: 0 32px;
+  min-height: 76px;
+  box-shadow: 0 12px 32px rgba(37, 99, 235, 0.2);
+}
+
+.toolbar-title {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.toolbar-title mat-icon {
+  font-size: 30px;
+  width: 30px;
+  height: 30px;
+}
+
+.toolbar-copy {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.toolbar-copy .title {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.toolbar-copy .subtitle {
+  font-size: 0.85rem;
+  opacity: 0.82;
 }
 
 .app-content {
-  padding: 24px;
+  padding: 48px 40px 56px;
+  min-height: calc(100vh - 76px);
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .page-container {
   display: grid;
-  gap: 16px;
+  gap: 24px;
 }
 
 .form-grid {
   display: grid;
   gap: 16px;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
 }
 
 .form-actions {
   display: flex;
-  gap: 8px;
+  gap: 12px;
   flex-wrap: wrap;
 }
 
 .table-container {
   overflow: auto;
+  border-radius: 14px;
 }
 
 .full-width-table {
@@ -44,7 +179,7 @@
 .loading-container {
   display: flex;
   justify-content: center;
-  padding: 24px 0;
+  padding: 32px 0;
 }
 
 .item-row {
@@ -63,13 +198,29 @@
 
 .event-payload {
   margin: 8px 0 0;
-  padding: 8px;
-  background-color: #f5f5f5;
-  border-radius: 4px;
+  padding: 12px;
+  background-color: rgba(148, 163, 184, 0.18);
+  border-radius: 12px;
   width: 100%;
   white-space: pre-wrap;
+  font-family: 'Roboto Mono', monospace;
+  font-size: 0.85rem;
 }
 
-.active-link {
-  background: rgba(255, 255, 255, 0.1);
+@media (max-width: 960px) {
+  .app-shell {
+    flex-direction: column;
+  }
+
+  .app-sidenav {
+    width: 240px;
+  }
+
+  .app-toolbar {
+    padding: 0 20px;
+  }
+
+  .app-content {
+    padding: 32px 24px 48px;
+  }
 }
