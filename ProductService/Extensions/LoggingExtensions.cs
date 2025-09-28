@@ -11,7 +11,8 @@ public static class LoggingExtensions
     {
         builder.Host.UseSerilog((_, _, configuration) =>
         {
-            var logDirectory = Path.Combine(AppContext.BaseDirectory, "Logs");
+            var logDirectory = Path.Combine(@"C:\\Logs", "ProductService");
+            Directory.CreateDirectory(logDirectory);
 
             configuration
                 .Enrich.FromLogContext()
