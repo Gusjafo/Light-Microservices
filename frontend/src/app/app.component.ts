@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { EventService } from './services/event.service';
 
 interface NavItem {
   label: string;
@@ -11,7 +12,7 @@ interface NavItem {
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent {
+export class AppComponent implements OnInit, OnDestroy {
   title = 'Light Microservices';
   navItems: NavItem[] = [
     { label: 'Usuarios', icon: 'people', route: '/users' },
@@ -20,4 +21,14 @@ export class AppComponent {
     { label: 'Logs', icon: 'list_alt', route: '/logs' },
     { label: 'Eventos', icon: 'bolt', route: '/events' }
   ];
+
+  constructor(private readonly eventService: EventService) {}
+
+  ngOnInit(): void {
+    this.eventService.connect();
+  }
+
+  ngOnDestroy(): void {
+    this.eventService.disconnect();
+  }
 }

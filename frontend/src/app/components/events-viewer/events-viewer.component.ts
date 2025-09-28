@@ -14,14 +14,12 @@ export class EventsViewerComponent implements OnInit, OnDestroy {
   constructor(private readonly eventService: EventService) {}
 
   ngOnInit(): void {
-    this.eventService.connect();
     this.subscriptions.add(this.eventService.events$.subscribe(events => (this.events = events)));
     this.subscriptions.add(this.eventService.isConnected$.subscribe(state => (this.isConnected = state)));
   }
 
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
-    this.eventService.disconnect();
   }
 
   clear(): void {
