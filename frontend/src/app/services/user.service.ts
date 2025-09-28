@@ -12,7 +12,7 @@ export interface User {
 
 @Injectable({ providedIn: 'root' })
 export class UserService {
-  private readonly baseUrl = `${environment.apiBaseUrl}/api/users`;
+  private readonly baseUrl = `${environment.apiUrls.user}/api/users`;
 
   constructor(private readonly http: HttpClient) {}
 

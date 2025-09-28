@@ -19,7 +19,7 @@ export interface Order {
 
 @Injectable({ providedIn: 'root' })
 export class OrderService {
-  private readonly baseUrl = `${environment.apiBaseUrl}/api/orders`;
+  private readonly baseUrl = `${environment.apiUrls.order}/api/orders`;
 
   constructor(private readonly http: HttpClient) {}
 
