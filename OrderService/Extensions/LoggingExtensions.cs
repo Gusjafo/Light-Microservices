@@ -14,6 +14,7 @@ public static class LoggingExtensions
     {
         var logDirectory = Path.Combine(AppContext.BaseDirectory, "logs");
         Directory.CreateDirectory(logDirectory);
+        EnsureLogFilesExist(logDirectory);
 
         builder.Services.AddSingleton(new LogFileOptions(logDirectory));
 
@@ -32,5 +33,22 @@ public static class LoggingExtensions
                     .Filter.ByIncludingOnly(e => e.Level >= LogEventLevel.Error)
                     .WriteTo.File(Path.Combine(logDirectory, "errors.log"), rollingInterval: RollingInterval.Day, retainedFileCountLimit: 7, shared: true));
         });
+    }
+
+    private static void EnsureLogFilesExist(string directory)
+    {
+        foreach (var fileName in new[] { "info.log", "warnings.log", "errors.log" })
+        {
+            var filePath = Path.Combine(directory, fileName);
+            if (File.Exists(filePath))
+            {
+                continue;
+            }
+
+            using (File.Open(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite))
+            {
+                // Ensure the file exists without locking it for other writers.
+            }
+        }
     }
 }
