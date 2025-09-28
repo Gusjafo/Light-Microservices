@@ -48,10 +48,26 @@ mat-card {
   box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
   border: 1px solid rgba(148, 163, 184, 0.16);
   overflow: hidden;
+  --card-padding-x: 24px;
+  --card-padding-top: 24px;
+  --card-padding-bottom: 24px;
 }
 
 mat-card-title {
   font-weight: 600;
+  padding: var(--card-padding-top) var(--card-padding-x) 8px;
+}
+
+mat-card-subtitle {
+  padding: 0 var(--card-padding-x) 12px;
+}
+
+mat-card-content {
+  padding: 0 var(--card-padding-x) var(--card-padding-bottom);
+}
+
+mat-card-actions {
+  padding: 0 var(--card-padding-x) var(--card-padding-bottom);
 }
 
 .table-container {

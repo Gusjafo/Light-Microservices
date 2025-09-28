@@ -5,6 +5,8 @@
 
 .app-sidenav {
   width: 280px;
+  flex: 0 0 280px;
+  box-sizing: border-box;
   background: linear-gradient(160deg, #f8fafc 0%, #e0f2fe 55%, #dbeafe 100%);
   color: #0f172a;
   padding: 28px 16px;
@@ -74,6 +76,7 @@ a.mat-mdc-list-item {
   margin: 2px 8px;
   padding: 0 18px;
   border-radius: 12px;
+  width: calc(100% - 16px);
   color: rgba(15, 23, 42, 0.8);
   transition: background 150ms ease, color 150ms ease, box-shadow 150ms ease;
 }
@@ -87,6 +90,10 @@ a.mat-mdc-list-item mat-icon[matListItemIcon] {
 
 a.mat-mdc-list-item span[matListItemTitle] {
   font-weight: 500;
+  flex: 1;
+  min-width: 0;
+  white-space: normal;
+  word-break: break-word;
 }
 
 a.mat-mdc-list-item:hover {
