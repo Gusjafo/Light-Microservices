@@ -1,3 +1,4 @@
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -66,6 +67,26 @@ builder.Services.AddHttpClient<IProductServiceClient, ProductServiceClient>((sp,
 
 // App services
 builder.Services.AddScoped<IOrderCreationService, OrderCreationService>();
+
+builder.Services.AddMassTransit(busConfigurator =>
+{
+    busConfigurator.SetKebabCaseEndpointNameFormatter();
+
+    busConfigurator.UsingRabbitMq((context, cfg) =>
+    {
+        var rabbitSection = builder.Configuration.GetSection("RabbitMq");
+        var host = rabbitSection.GetValue<string>("Host") ?? "rabbitmq";
+        var virtualHost = rabbitSection.GetValue<string>("VirtualHost") ?? "/";
+        var username = rabbitSection.GetValue<string>("Username") ?? "guest";
+        var password = rabbitSection.GetValue<string>("Password") ?? "guest";
+
+        cfg.Host(host, virtualHost, h =>
+        {
+            h.Username(username);
+            h.Password(password);
+        });
+    });
+});
 
 var app = builder.Build();
 

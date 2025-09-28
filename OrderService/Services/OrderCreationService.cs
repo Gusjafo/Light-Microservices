@@ -1,3 +1,5 @@
+using Contracts.Events;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using OrderService.Data;
 using OrderService.External;
@@ -5,11 +7,16 @@ using OrderService.Models;
 
 namespace OrderService.Services
 {
-    public class OrderCreationService(OrderContext db, IUserServiceClient users, IProductServiceClient products) : IOrderCreationService
+    public class OrderCreationService(
+        OrderContext db,
+        IUserServiceClient users,
+        IProductServiceClient products,
+        IPublishEndpoint publishEndpoint) : IOrderCreationService
     {
         private readonly OrderContext _db = db;
         private readonly IUserServiceClient _users = users;
         private readonly IProductServiceClient _products = products;
+        private readonly IPublishEndpoint _publishEndpoint = publishEndpoint;
 
         public async Task<(bool Ok, string? Error, Order? Order)> CreateAsync(Guid userId, Guid productId, int quantity, CancellationToken ct)
         {
@@ -28,6 +35,13 @@ namespace OrderService.Services
             var order = new Order { UserId = userId, ProductId = productId, Quantity = quantity };
             _db.Orders.Add(order);
             await _db.SaveChangesAsync(ct);
+
+            await _publishEndpoint.Publish(new OrderCreatedEvent(
+                order.Id,
+                order.UserId,
+                order.ProductId,
+                order.Quantity,
+                order.CreatedAtUtc), ct);
 
             return (true, null, order);
         }
