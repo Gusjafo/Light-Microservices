@@ -12,13 +12,13 @@ public static class LoggingExtensions
 {
     public static void ConfigureSerilogLogging(this WebApplicationBuilder builder)
     {
+        var logDirectory = Path.Combine(AppContext.BaseDirectory, "logs");
+        Directory.CreateDirectory(logDirectory);
+
+        builder.Services.AddSingleton(new LogFileOptions(logDirectory));
+
         builder.Host.UseSerilog((_, _, configuration) =>
         {
-            var logDirectory = Path.Combine(AppContext.BaseDirectory, "logs");
-            Directory.CreateDirectory(logDirectory);
-
-            builder.Services.AddSingleton(new LogFileOptions(logDirectory));
-
             configuration
                 .Enrich.FromLogContext()
                 .WriteTo.Console()
