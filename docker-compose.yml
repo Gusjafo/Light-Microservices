@@ -8,8 +8,8 @@ services:
 
   user-service:
     build:
-      context: ./UserService
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: UserService/Dockerfile
     container_name: user-service
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
