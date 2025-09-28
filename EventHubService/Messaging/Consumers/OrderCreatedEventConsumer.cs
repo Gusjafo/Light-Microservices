@@ -15,6 +15,6 @@ public class OrderCreatedEventConsumer(IHubContext<NotificationHub> hubContext, 
     public async Task Consume(ConsumeContext<OrderCreatedEvent> context)
     {
         await _hubContext.Clients.All.SendAsync("OrderCreated", context.Message, context.CancellationToken);
-        _logger.LogInformation("Forwarded OrderCreatedEvent for Order {OrderId} to connected clients.", context.Message.OrderId);
+        _logger.LogInformation("Forwarded OrderCreatedEvent for Order {OrderId} to connected clients.", context.Message.Id);
     }
 }
