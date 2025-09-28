@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using OrderService.Models;
 using OrderService.Services;
@@ -9,6 +10,13 @@ namespace OrderService.Controllers;
 public class OrdersController(IOrderCreationService service) : ControllerBase
 {
     private readonly IOrderCreationService _service = service;
+
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<Order>>> GetAll(CancellationToken ct)
+    {
+        var orders = await _service.GetAllAsync(ct);
+        return Ok(orders);
+    }
 
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateOrderRequest req, CancellationToken ct)

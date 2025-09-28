@@ -1,5 +1,5 @@
-using ProductService.Data;
-using ProductService.Extensions;
+using EventHubService.Extensions;
+using EventHubService.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,14 +18,13 @@ builder.Services.AddCors(options =>
     });
 });
 
-builder.Services.AddControllers();
-builder.Services.AddProductDatabase(builder.Configuration);
-builder.Services.AddProductMessaging(builder.Configuration);
+builder.Services.AddEventHubServices(builder.Configuration);
 
 var app = builder.Build();
 
 app.UseCors(allowAngularPolicy);
 
 app.MapControllers();
-app.ApplyMigrations<ProductContext>();
+app.MapHub<NotificationHub>(NotificationHub.HubPath);
+
 app.Run();
