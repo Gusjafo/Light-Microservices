@@ -21,7 +21,6 @@ export class ProductsComponent implements OnInit {
   ) {
     this.productForm = this.fb.group({
       name: ['', [Validators.required, Validators.maxLength(100)]],
-      description: [''],
       price: [0, [Validators.required, Validators.min(0)]],
       stock: [0, [Validators.required, Validators.min(0)]]
     });
@@ -47,7 +46,11 @@ export class ProductsComponent implements OnInit {
 
   selectProduct(product: Product): void {
     this.selectedProduct = product;
-    this.productForm.patchValue(product);
+    this.productForm.patchValue({
+      name: product.name,
+      price: product.price,
+      stock: product.stock
+    });
   }
 
   resetForm(): void {

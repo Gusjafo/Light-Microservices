@@ -3,18 +3,12 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
-export interface OrderItem {
-  productId: number;
-  quantity: number;
-}
-
 export interface Order {
-  id: number;
-  userId: number;
-  status: string;
-  totalAmount: number;
-  createdAt?: string;
-  items: OrderItem[];
+  id: string;
+  userId: string;
+  productId: string;
+  quantity: number;
+  createdAtUtc: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -27,7 +21,7 @@ export class OrderService {
     return this.http.get<Order[]>(this.baseUrl);
   }
 
-  createOrder(order: { userId: number; items: OrderItem[] }): Observable<Order> {
+  createOrder(order: { userId: string; productId: string; quantity: number }): Observable<Order> {
     return this.http.post<Order>(this.baseUrl, order);
   }
 }

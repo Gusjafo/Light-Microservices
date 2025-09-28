@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Order, OrderService } from '../../services/order.service';
 import { Product, ProductService } from '../../services/product.service';
@@ -14,7 +14,7 @@ export class OrdersComponent implements OnInit {
   orders: Order[] = [];
   users: User[] = [];
   products: Product[] = [];
-  displayedColumns = ['id', 'userId', 'status', 'totalAmount', 'items'];
+  displayedColumns = ['id', 'userId', 'productId', 'quantity', 'createdAtUtc'];
   isLoadingOrders = false;
   isSubmitting = false;
 
@@ -26,8 +26,9 @@ export class OrdersComponent implements OnInit {
     private readonly snackBar: MatSnackBar
   ) {
     this.orderForm = this.fb.group({
-      userId: [null, Validators.required],
-      items: this.fb.array([this.createItemGroup()])
+      userId: [null as string | null, Validators.required],
+      productId: [null as string | null, Validators.required],
+      quantity: [1, [Validators.required, Validators.min(1)]]
     });
   }
 
@@ -35,27 +36,6 @@ export class OrdersComponent implements OnInit {
     this.loadUsers();
     this.loadProducts();
     this.loadOrders();
-  }
-
-  get items(): FormArray {
-    return this.orderForm.get('items') as FormArray;
-  }
-
-  private createItemGroup(): FormGroup {
-    return this.fb.group({
-      productId: [null, Validators.required],
-      quantity: [1, [Validators.required, Validators.min(1)]]
-    });
-  }
-
-  addItem(): void {
-    this.items.push(this.createItemGroup());
-  }
-
-  removeItem(index: number): void {
-    if (this.items.length > 1) {
-      this.items.removeAt(index);
-    }
   }
 
   loadUsers(): void {
@@ -87,12 +67,16 @@ export class OrdersComponent implements OnInit {
     }
 
     this.isSubmitting = true;
-    this.orderService.createOrder(this.orderForm.value).subscribe({
+    const { userId, productId, quantity } = this.orderForm.value as {
+      userId: string;
+      productId: string;
+      quantity: number;
+    };
+
+    this.orderService.createOrder({ userId, productId, quantity }).subscribe({
       next: () => {
         this.snackBar.open('Pedido creado', 'Cerrar', { duration: 2000 });
-        this.orderForm.reset({ userId: null });
-        this.items.clear();
-        this.addItem();
+        this.orderForm.reset({ userId: null, productId: null, quantity: 1 });
         this.loadOrders();
         this.isSubmitting = false;
       },
@@ -103,7 +87,4 @@ export class OrdersComponent implements OnInit {
     });
   }
 
-  trackById(index: number, item: { productId: number }): number {
-    return item.productId ?? index;
-  }
 }

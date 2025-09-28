@@ -11,27 +11,19 @@
           <mat-error *ngIf="orderForm.get('userId')?.invalid">Selecciona un usuario</mat-error>
         </mat-form-field>
 
-        <div formArrayName="items" class="order-items">
-          <div *ngFor="let item of items.controls; index as i; trackBy: trackById" [formGroupName]="i" class="item-row">
-            <mat-form-field appearance="outline">
-              <mat-label>Producto</mat-label>
-              <mat-select formControlName="productId" required>
-                <mat-option *ngFor="let product of products" [value]="product.id">{{ product.name }}</mat-option>
-              </mat-select>
-            </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Producto</mat-label>
+          <mat-select formControlName="productId" placeholder="Selecciona un producto" required>
+            <mat-option *ngFor="let product of products" [value]="product.id">{{ product.name }}</mat-option>
+          </mat-select>
+          <mat-error *ngIf="orderForm.get('productId')?.invalid">Selecciona un producto</mat-error>
+        </mat-form-field>
 
-            <mat-form-field appearance="outline">
-              <mat-label>Cantidad</mat-label>
-              <input matInput type="number" formControlName="quantity" min="1" required />
-            </mat-form-field>
-
-            <button mat-icon-button color="warn" type="button" (click)="removeItem(i)" [disabled]="items.length === 1">
-              <mat-icon>delete</mat-icon>
-            </button>
-          </div>
-        </div>
-
-        <button mat-button type="button" color="accent" (click)="addItem()">Agregar producto</button>
+        <mat-form-field appearance="outline">
+          <mat-label>Cantidad</mat-label>
+          <input matInput type="number" formControlName="quantity" min="1" required />
+          <mat-error *ngIf="orderForm.get('quantity')?.invalid">Ingresa una cantidad válida</mat-error>
+        </mat-form-field>
 
         <div class="form-actions">
           <button mat-flat-button color="primary" type="submit" [disabled]="orderForm.invalid || isSubmitting">
@@ -57,27 +49,19 @@
             <td mat-cell *matCellDef="let order">{{ order.userId }}</td>
           </ng-container>
 
-          <ng-container matColumnDef="status">
-            <th mat-header-cell *matHeaderCellDef>Estado</th>
-            <td mat-cell *matCellDef="let order">
-              <mat-chip-set>
-                <mat-chip color="primary" selected>{{ order.status }}</mat-chip>
-              </mat-chip-set>
-            </td>
+          <ng-container matColumnDef="productId">
+            <th mat-header-cell *matHeaderCellDef>Producto</th>
+            <td mat-cell *matCellDef="let order">{{ order.productId }}</td>
           </ng-container>
 
-          <ng-container matColumnDef="totalAmount">
-            <th mat-header-cell *matHeaderCellDef>Total</th>
-            <td mat-cell *matCellDef="let order">{{ order.totalAmount | currency:'USD' }}</td>
+          <ng-container matColumnDef="quantity">
+            <th mat-header-cell *matHeaderCellDef>Cantidad</th>
+            <td mat-cell *matCellDef="let order">{{ order.quantity }}</td>
           </ng-container>
 
-          <ng-container matColumnDef="items">
-            <th mat-header-cell *matHeaderCellDef>Items</th>
-            <td mat-cell *matCellDef="let order">
-              <div class="items-list">
-                <span *ngFor="let item of order.items">#{{ item.productId }} × {{ item.quantity }}</span>
-              </div>
-            </td>
+          <ng-container matColumnDef="createdAtUtc">
+            <th mat-header-cell *matHeaderCellDef>Creado</th>
+            <td mat-cell *matCellDef="let order">{{ order.createdAtUtc | date:'short' }}</td>
           </ng-container>
 
           <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>

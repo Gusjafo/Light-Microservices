@@ -4,12 +4,10 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 export interface Product {
-  id: number;
+  id: string;
   name: string;
-  description: string;
   price: number;
   stock: number;
-  createdAt?: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -22,7 +20,7 @@ export class ProductService {
     return this.http.get<Product[]>(this.baseUrl);
   }
 
-  getProduct(id: number): Observable<Product> {
+  getProduct(id: string): Observable<Product> {
     return this.http.get<Product>(`${this.baseUrl}/${id}`);
   }
 
@@ -30,11 +28,11 @@ export class ProductService {
     return this.http.post<Product>(this.baseUrl, product);
   }
 
-  updateProduct(id: number, product: Partial<Product>): Observable<Product> {
+  updateProduct(id: string, product: Partial<Product>): Observable<Product> {
     return this.http.put<Product>(`${this.baseUrl}/${id}`, product);
   }
 
-  deleteProduct(id: number): Observable<void> {
+  deleteProduct(id: string): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
 }
