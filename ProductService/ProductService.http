@@ -1,6 +1,22 @@
 @ProductService_HostAddress = http://localhost:5017
+@ProductId = 00000000-0000-0000-0000-000000000000
 
-GET {{ProductService_HostAddress}}/weatherforecast/
+### List products
+GET {{ProductService_HostAddress}}/api/products
 Accept: application/json
 
-###
+### Get a product by id
+GET {{ProductService_HostAddress}}/api/products/{{ProductId}}
+Accept: application/json
+
+### Create a new product
+POST {{ProductService_HostAddress}}/api/products
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "Sample Product",
+  "description": "A product created from the HTTP scratch file.",
+  "price": 9.99
+}
+
