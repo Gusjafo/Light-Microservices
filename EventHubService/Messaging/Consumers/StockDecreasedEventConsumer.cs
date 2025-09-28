@@ -14,7 +14,12 @@ public class StockDecreasedEventConsumer(IHubContext<NotificationHub> hubContext
 
     public async Task Consume(ConsumeContext<StockDecreasedEvent> context)
     {
-        await _hubContext.Clients.All.SendAsync("StockDecreased", context.Message, context.CancellationToken);
+        await _hubContext.Clients.All.SendAsync(
+            NotificationHub.BroadcastEventMethod,
+            nameof(StockDecreasedEvent),
+            context.Message,
+            context.Message.ProcessedAtUtc,
+            context.CancellationToken);
         _logger.LogInformation(
             "Forwarded StockDecreasedEvent for Product {ProductId} to connected clients.",
             context.Message.ProductId);

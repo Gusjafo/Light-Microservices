@@ -14,7 +14,12 @@ public class OrderFailedEventConsumer(IHubContext<NotificationHub> hubContext, I
 
     public async Task Consume(ConsumeContext<OrderFailedEvent> context)
     {
-        await _hubContext.Clients.All.SendAsync("OrderFailed", context.Message, context.CancellationToken);
+        await _hubContext.Clients.All.SendAsync(
+            NotificationHub.BroadcastEventMethod,
+            nameof(OrderFailedEvent),
+            context.Message,
+            context.Message.FailedAtUtc,
+            context.CancellationToken);
         _logger.LogInformation(
             "Forwarded OrderFailedEvent for Order {OrderId} to connected clients.",
             context.Message.OrderId);
