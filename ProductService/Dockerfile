@@ -2,11 +2,15 @@
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
-COPY ProductService.csproj ./
-RUN dotnet restore
+# Copy project files first to leverage Docker layer caching
+COPY ProductService/ProductService.csproj ProductService/
+COPY Contracts/Contracts.csproj Contracts/
+RUN dotnet restore ProductService/ProductService.csproj
 
-COPY . ./
-RUN dotnet publish -c Release -o /app/publish /p:UseAppHost=false
+# Copy the remaining source code
+COPY ProductService/. ProductService/
+COPY Contracts/. Contracts/
+RUN dotnet publish ProductService/ProductService.csproj -c Release -o /app/publish /p:UseAppHost=false
 
 # Runtime stage
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final
