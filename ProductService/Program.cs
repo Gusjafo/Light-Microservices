@@ -3,8 +3,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using ProductService.Data;
 using ProductService.Messaging.Consumers;
+using Serilog;
+using Serilog.Events;
 
 var builder = WebApplication.CreateBuilder(args);
+
+ConfigureLogging(builder);
 
 // Add services
 builder.Services.AddControllers();
@@ -45,3 +49,24 @@ context.Database.Migrate();
 // Configure HTTP request pipeline
 app.MapControllers();
 app.Run();
+
+static void ConfigureLogging(WebApplicationBuilder builder)
+{
+    builder.Host.UseSerilog((context, services, configuration) =>
+    {
+        var logDirectory = Path.Combine(AppContext.BaseDirectory, "Logs");
+
+        configuration
+            .Enrich.FromLogContext()
+            .WriteTo.Console()
+            .WriteTo.Logger(lc => lc
+                .Filter.ByIncludingOnly(e => e.Level == LogEventLevel.Information)
+                .WriteTo.File(Path.Combine(logDirectory, "info.log"), rollingInterval: RollingInterval.Day, retainedFileCountLimit: 7))
+            .WriteTo.Logger(lc => lc
+                .Filter.ByIncludingOnly(e => e.Level == LogEventLevel.Warning)
+                .WriteTo.File(Path.Combine(logDirectory, "warnings.log"), rollingInterval: RollingInterval.Day, retainedFileCountLimit: 7))
+            .WriteTo.Logger(lc => lc
+                .Filter.ByIncludingOnly(e => e.Level >= LogEventLevel.Error)
+                .WriteTo.File(Path.Combine(logDirectory, "errors.log"), rollingInterval: RollingInterval.Day, retainedFileCountLimit: 7));
+    });
+}

@@ -1,9 +1,8 @@
 namespace Contracts.Events;
 
-public record OrderCreatedEvent(
+public record UserCreatedEvent(
     Guid EventId,
-    Guid Id,
     Guid UserId,
-    Guid ProductId,
-    int Quantity,
+    string Name,
+    string Email,
     DateTime CreatedAtUtc);
