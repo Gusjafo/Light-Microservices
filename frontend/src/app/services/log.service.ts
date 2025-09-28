@@ -12,7 +12,7 @@ export interface LogEntry {
 
 @Injectable({ providedIn: 'root' })
 export class LogService {
-  private readonly baseUrl = `${environment.apiBaseUrl}/api/logs`;
+  private readonly baseUrl = `${environment.apiUrls.eventHub}/api/logs`;
 
   constructor(private readonly http: HttpClient) {}
 
