@@ -14,7 +14,9 @@ export class OrdersComponent implements OnInit {
   orders: Order[] = [];
   users: User[] = [];
   products: Product[] = [];
-  displayedColumns = ['id', 'userId', 'productId', 'quantity', 'createdAtUtc'];
+  private userNameById = new Map<string, string>();
+  private productNameById = new Map<string, string>();
+  displayedColumns = ['id', 'user', 'product', 'quantity', 'createdAtUtc'];
   isLoadingOrders = false;
   isSubmitting = false;
 
@@ -39,11 +41,23 @@ export class OrdersComponent implements OnInit {
   }
 
   loadUsers(): void {
-    this.userService.getUsers().subscribe(users => (this.users = users));
+    this.userService.getUsers().subscribe(users => {
+      this.users = users;
+      this.userNameById.clear();
+      for (const user of users) {
+        this.userNameById.set(user.id, user.name);
+      }
+    });
   }
 
   loadProducts(): void {
-    this.productService.getProducts().subscribe(products => (this.products = products));
+    this.productService.getProducts().subscribe(products => {
+      this.products = products;
+      this.productNameById.clear();
+      for (const product of products) {
+        this.productNameById.set(product.id, product.name);
+      }
+    });
   }
 
   loadOrders(): void {
@@ -85,6 +99,14 @@ export class OrdersComponent implements OnInit {
         this.isSubmitting = false;
       }
     });
+  }
+
+  getUserName(order: Order): string {
+    return this.userNameById.get(order.userId) ?? order.userId;
+  }
+
+  getProductName(order: Order): string {
+    return this.productNameById.get(order.productId) ?? order.productId;
   }
 
 }
