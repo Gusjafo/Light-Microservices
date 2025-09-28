@@ -10,7 +10,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Production
       - ConnectionStrings__Default=Data Source=/data/users.db
     volumes:
-      - user_data:/data
+      - ./data/user-service:/data
     ports:
       - "5001:80"
 
@@ -23,7 +23,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Production
       - ConnectionStrings__Default=Data Source=/data/products.db
     volumes:
-      - product_data:/data
+      - ./data/product-service:/data
     ports:
       - "5003:80"
 
@@ -41,11 +41,8 @@ services:
       - user-service
       - product-service
     volumes:
-      - order_data:/data
+      - ./data/order-service:/data
     ports:
       - "5005:80"
 
-volumes:
-  user_data:
-  product_data:
-  order_data:
+volumes: {}

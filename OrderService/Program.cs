@@ -20,8 +20,18 @@ builder.Services.AddControllers().AddJsonOptions(o =>
 builder.Services.AddDbContext<OrderContext>(opt =>
     opt.UseSqlite(builder.Configuration.GetConnectionString("Default")));
 
-// Bind endpoints
-builder.Services.Configure<ServiceEndpoints>(builder.Configuration.GetSection("Services"));
+// Bind endpoints from configuration (validated on startup)
+builder.Services
+    .AddOptions<ServiceEndpoints>()
+    .Bind(builder.Configuration.GetRequiredSection("Services"))
+    .ValidateDataAnnotations()
+    .Validate(
+        endpoints => endpoints.User is { IsAbsoluteUri: true },
+        "The user service base URL must be an absolute URI.")
+    .Validate(
+        endpoints => endpoints.Product is { IsAbsoluteUri: true },
+        "The product service base URL must be an absolute URI.")
+    .ValidateOnStart();
 
 // Resilience policies
 static IAsyncPolicy<HttpResponseMessage> RetryPolicy() =>
@@ -39,7 +49,7 @@ static IAsyncPolicy<HttpResponseMessage> CircuitBreakerPolicy() =>
 builder.Services.AddHttpClient<IUserServiceClient, UserServiceClient>((sp, http) =>
 {
     var endpoints = sp.GetRequiredService<IOptions<ServiceEndpoints>>().Value;
-    http.BaseAddress = new Uri(endpoints.User);
+    http.BaseAddress = endpoints.User;
     http.Timeout = TimeSpan.FromSeconds(5);
 })
 .AddPolicyHandler(RetryPolicy())
@@ -48,7 +58,7 @@ builder.Services.AddHttpClient<IUserServiceClient, UserServiceClient>((sp, http)
 builder.Services.AddHttpClient<IProductServiceClient, ProductServiceClient>((sp, http) =>
 {
     var endpoints = sp.GetRequiredService<IOptions<ServiceEndpoints>>().Value;
-    http.BaseAddress = new Uri(endpoints.Product);
+    http.BaseAddress = endpoints.Product;
     http.Timeout = TimeSpan.FromSeconds(5);
 })
 .AddPolicyHandler(RetryPolicy())

@@ -1,8 +1,13 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace OrderService.External
 {
     public class ServiceEndpoints
     {
-        public string User { get; set; } = default!;
-        public string Product { get; set; } = default!;
+        [Required]
+        public Uri User { get; set; } = null!;
+
+        [Required]
+        public Uri Product { get; set; } = null!;
     }
 }

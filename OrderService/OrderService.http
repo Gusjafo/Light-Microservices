@@ -1,6 +1,18 @@
 @OrderService_HostAddress = http://localhost:5252
+@OrderId = 00000000-0000-0000-0000-000000000000
 
-GET {{OrderService_HostAddress}}/weatherforecast/
+### Create a new order
+POST {{OrderService_HostAddress}}/api/orders
+Content-Type: application/json
 Accept: application/json
 
-###
+{
+  "userId": "11111111-1111-1111-1111-111111111111",
+  "productId": "22222222-2222-2222-2222-222222222222",
+  "quantity": 1
+}
+
+### Get an order by id
+GET {{OrderService_HostAddress}}/api/orders/{{OrderId}}
+Accept: application/json
+

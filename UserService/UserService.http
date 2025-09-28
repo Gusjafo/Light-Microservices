@@ -1,6 +1,21 @@
 @UserService_HostAddress = http://localhost:5055
+@UserId = 00000000-0000-0000-0000-000000000000
 
-GET {{UserService_HostAddress}}/weatherforecast/
+### List users
+GET {{UserService_HostAddress}}/api/users
 Accept: application/json
 
-###
+### Get a user by id
+GET {{UserService_HostAddress}}/api/users/{{UserId}}
+Accept: application/json
+
+### Create a new user
+POST {{UserService_HostAddress}}/api/users
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "Sample User",
+  "email": "sample.user@example.com"
+}
+
