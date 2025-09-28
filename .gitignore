@@ -52,3 +52,8 @@ Logs/
 *.temp
 *.bak
 *.Backup
+
+# db
+data/order-service/orders*
+data/product-service/products*
+data/user-service/users*
