@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using Contracts.Events;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
@@ -68,6 +70,12 @@ namespace OrderService.Services
                 productId,
                 reason,
                 DateTime.UtcNow), ct);
+
+        public async Task<IReadOnlyList<Order>> GetAllAsync(CancellationToken ct) =>
+            await _db.Orders
+                .AsNoTracking()
+                .OrderByDescending(o => o.CreatedAtUtc)
+                .ToListAsync(ct);
 
         public Task<Order?> GetAsync(Guid id, CancellationToken ct) =>
             _db.Orders.AsNoTracking().FirstOrDefaultAsync(o => o.Id == id, ct);

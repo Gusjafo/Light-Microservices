@@ -31,11 +31,12 @@ The goal is to understand the basics of microservices step by step:
 
 ## 🏗️ Services in this Project
 
-We simulate a **mini e-commerce system** with 3 services:
+We simulate a **mini e-commerce system** with 4 services:
 
 - **User Service** → manages users (`users.db`)
 - **Product Service** → manages products (`products.db`)
 - **Order Service** → manages orders (`orders.db`), validates users and products
+- **EventHub Service** → listens to RabbitMQ events and streams them to the UI via SignalR
 
 ---
 
@@ -45,7 +46,8 @@ We simulate a **mini e-commerce system** with 3 services:
 MicroservicesDemo.sln
 ├── UserService/          # Manages users
 ├── ProductService/       # Manages products
-└── OrderService/         # Manages orders
+├── OrderService/         # Manages orders
+└── EventHubService/      # SignalR hub that replays domain events for the UI
 ```
 
 Each service is:
@@ -72,6 +74,10 @@ dotnet run
 # Order Service (http://localhost:5005)
 cd OrderService
 dotnet run
+
+# EventHub Service (http://localhost:5007)
+cd EventHubService
+dotnet run
 ```
 
 ### 🐳 Running with Docker Compose
@@ -83,6 +89,8 @@ docker compose up --build
 ```
 
 Database files are stored on the host inside the `data/` directory (one subfolder per service), so they survive container restarts.
+
+The EventHub service is also available at `http://localhost:5007` and exposes the SignalR hub at `/hub/notifications` for Angular clients.
 
 > **RabbitMQ Dashboard** — Once Compose is running, open http://localhost:15672 (default user/password: `guest`/`guest`) to inspect queues, messages, and consumers that MassTransit creates.
 
@@ -99,9 +107,12 @@ Database files are stored on the host inside the `data/` directory (one subfolde
 ## 🔎 Endpoints
 
 ### 👤 User Service
-- `GET /api/users` → list users  
-- `GET /api/users/{id}` → get user by ID  
-- `POST /api/users` → create a user  
+- `GET /api/users` → list users
+- `GET /api/users/{id}` → get user by ID
+- `POST /api/users` → create a user
+- `PUT /api/users/{id}` → update name/email
+- `DELETE /api/users/{id}` → remove a user
+- `GET /api/logs/{level}` → inspect `logs/{level}.log` (`info`, `warning`, `error`)
 
 Example request:
 ```json
@@ -111,9 +122,12 @@ Example request:
 ---
 
 ### 📦 Product Service
-- `GET /api/products` → list products  
-- `GET /api/products/{id}` → get product by ID  
-- `POST /api/products` → create a product  
+- `GET /api/products` → list products
+- `GET /api/products/{id}` → get product by ID
+- `POST /api/products` → create a product
+- `PUT /api/products/{id}` → update product details
+- `DELETE /api/products/{id}` → remove a product
+- `GET /api/logs/{level}` → inspect `logs/{level}.log`
 
 Example request:
 ```json
@@ -123,8 +137,15 @@ Example request:
 ---
 
 ### 📝 Order Service
-- `GET /api/orders/{id}` → get order by ID  
-- `POST /api/orders` → create a new order  
+- `GET /api/orders` → list the most recent orders
+- `GET /api/orders/{id}` → get order by ID
+- `POST /api/orders` → create a new order
+- `GET /api/logs/{level}` → inspect `logs/{level}.log`
+
+### 🔔 EventHub Service
+- `SignalR hub` → connect clients to `/hub/notifications`
+- Broadcasts: `OrderCreated`, `StockDecreased`, `OrderFailed`, `UserCreated`
+- `GET /api/logs/{level}` → inspect `logs/{level}.log`
 
 Example request:
 ```json
@@ -158,7 +179,7 @@ The **Order Service** now orchestrates synchronous validations via **REST APIs**
 
 - ✅ **Event catalog expanded** → `UserCreatedEvent`, `OrderCreatedEvent`, `OrderFailedEvent`, and `StockDecreasedEvent` flow through RabbitMQ.
 - ✅ **Event IDs & deduplication** → every message carries an `EventId`; each service persists processed IDs to a dedicated `ProcessedEvents` table before acting, so re-delivery is safe.
-- ✅ **Serilog observability** → all services write structured logs to `Logs/info.log`, `Logs/warnings.log`, and `Logs/errors.log` while still streaming to the console.
+- ✅ **Serilog observability** → all services write structured logs to `logs/info.log`, `logs/warnings.log`, and `logs/errors.log` while still streaming to the console and exposing them via `GET /api/logs/{level}`.
 - 🔄 **Idempotent consumers** → Product Service checks the `ProcessedEvents` table before decreasing stock, preventing accidental double decrements.
 
 ## 🚀 Step 4: Event-Driven Choreography
@@ -170,6 +191,13 @@ To remove tight coupling after an order is placed we introduced RabbitMQ + MassT
 3. Product Service consumes order events, decrements inventory exactly once, and broadcasts `StockDecreasedEvent` for downstream systems (analytics, search, etc.).
 4. RabbitMQ keeps a durable queue so no order events are lost if Product Service is offline temporarily.
 5. You can watch the message flow via the management UI at http://localhost:15672.
+
+## 🚀 Step 6: Angular-ready Backend
+
+- ✅ **CORS policy** → every microservice shares the `AllowAngular` policy so `http://localhost:4200` can call REST endpoints and SignalR without browser errors.
+- ✅ **CRUD-friendly APIs** → User and Product services expose full CRUD at `/api/users` and `/api/products`; Order service adds list + detail endpoints at `/api/orders`.
+- ✅ **EventHub service** → subscribes to `UserCreatedEvent`, `OrderCreatedEvent`, `StockDecreasedEvent`, and `OrderFailedEvent` via MassTransit and broadcasts them to Angular clients over SignalR.
+- ✅ **Log streaming** → each service offers `GET /api/logs/{level}` to surface `info`, `warning`, or `error` logs generated by Serilog.
 
 ### Future Topics
 - API Gateway (single entry point)

@@ -4,9 +4,9 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Serilog.Events;
-using UserService.Logging;
+using EventHubService.Logging;
 
-namespace UserService.Extensions;
+namespace EventHubService.Extensions;
 
 public static class LoggingExtensions
 {

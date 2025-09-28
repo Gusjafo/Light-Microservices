@@ -61,4 +61,20 @@ services:
     ports:
       - "5005:80"
 
+  eventhub-service:
+    build:
+      context: .
+      dockerfile: EventHubService/Dockerfile
+    container_name: eventhub-service
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - RabbitMq__Host=rabbitmq
+      - RabbitMq__VirtualHost=/
+      - RabbitMq__Username=guest
+      - RabbitMq__Password=guest
+    depends_on:
+      - rabbitmq
+    ports:
+      - "5007:80"
+
 volumes: {}
