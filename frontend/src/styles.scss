@@ -20,12 +20,36 @@ $theme: mat.define-light-theme(
 
 @include mat.all-component-themes($theme);
 
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
 body {
   margin: 0;
-  font-family: Roboto, 'Helvetica Neue', sans-serif;
-  background-color: #f3f4f6;
+  font-family: 'Roboto', 'Helvetica Neue', sans-serif;
+  background: radial-gradient(circle at top left, #eef2ff 0%, #f9fafb 35%, #f3f4f6 100%);
+  color: #111827;
+}
+
+mat-toolbar.mat-primary {
+  background: linear-gradient(135deg, mat.get-color-from-palette($primary, 500), mat.get-color-from-palette($primary, 700));
 }
 
 mat-card {
   background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  overflow: hidden;
+}
+
+mat-card-title {
+  font-weight: 600;
 }
