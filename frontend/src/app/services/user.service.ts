@@ -4,10 +4,9 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 export interface User {
-  id: number;
+  id: string;
   name: string;
   email: string;
-  createdAt?: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -20,7 +19,7 @@ export class UserService {
     return this.http.get<User[]>(this.baseUrl);
   }
 
-  getUser(id: number): Observable<User> {
+  getUser(id: string): Observable<User> {
     return this.http.get<User>(`${this.baseUrl}/${id}`);
   }
 
@@ -28,11 +27,11 @@ export class UserService {
     return this.http.post<User>(this.baseUrl, user);
   }
 
-  updateUser(id: number, user: Partial<User>): Observable<User> {
+  updateUser(id: string, user: Partial<User>): Observable<User> {
     return this.http.put<User>(`${this.baseUrl}/${id}`, user);
   }
 
-  deleteUser(id: number): Observable<void> {
+  deleteUser(id: string): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
 }

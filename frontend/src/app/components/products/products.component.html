@@ -10,11 +10,6 @@
         </mat-form-field>
 
         <mat-form-field appearance="outline">
-          <mat-label>Descripción</mat-label>
-          <textarea matInput formControlName="description" rows="3"></textarea>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
           <mat-label>Precio</mat-label>
           <input matInput type="number" formControlName="price" min="0" required />
           <mat-error *ngIf="productForm.get('price')?.hasError('required')">Campo obligatorio</mat-error>
