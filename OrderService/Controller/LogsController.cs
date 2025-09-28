@@ -39,8 +39,8 @@ public class LogsController(LogFileOptions options, ILogger<LogsController> logg
         var filePath = Path.Combine(_logDirectory, fileName);
         if (!System.IO.File.Exists(filePath))
         {
-            _logger.LogInformation("Log file {File} not found.", filePath);
-            return NotFound();
+            _logger.LogInformation("Log file {File} not found. Returning empty response.", filePath);
+            return Content(string.Empty, "text/plain");
         }
 
         await using var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
