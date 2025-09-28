@@ -24,12 +24,25 @@ namespace OrderService.Services
 
             // 1) Check user
             var userExists = await _users.UserExistsAsync(userId, ct);
-            if (!userExists) return (false, $"User {userId} not found.", null);
+            if (!userExists)
+            {
+                await PublishOrderFailedAsync(null, userId, productId, $"User {userId} not found.", ct);
+                return (false, $"User {userId} not found.", null);
+            }
 
             // 2) Check product + stock
             var product = await _products.GetProductAsync(productId, ct);
-            if (product is null) return (false, $"Product {productId} not found.", null);
-            if (product.Stock < quantity) return (false, $"Insufficient stock. Available: {product.Stock}.", null);
+            if (product is null)
+            {
+                await PublishOrderFailedAsync(null, userId, productId, $"Product {productId} not found.", ct);
+                return (false, $"Product {productId} not found.", null);
+            }
+
+            if (product.Stock < quantity)
+            {
+                await PublishOrderFailedAsync(null, userId, productId, $"Insufficient stock. Available: {product.Stock}.", ct);
+                return (false, $"Insufficient stock. Available: {product.Stock}.", null);
+            }
 
             // 3) Persist order
             var order = new Order { UserId = userId, ProductId = productId, Quantity = quantity };
@@ -37,6 +50,7 @@ namespace OrderService.Services
             await _db.SaveChangesAsync(ct);
 
             await _publishEndpoint.Publish(new OrderCreatedEvent(
+                Guid.NewGuid(),
                 order.Id,
                 order.UserId,
                 order.ProductId,
@@ -45,6 +59,15 @@ namespace OrderService.Services
 
             return (true, null, order);
         }
+
+        private Task PublishOrderFailedAsync(Guid? orderId, Guid userId, Guid productId, string reason, CancellationToken ct) =>
+            _publishEndpoint.Publish(new OrderFailedEvent(
+                Guid.NewGuid(),
+                orderId,
+                userId,
+                productId,
+                reason,
+                DateTime.UtcNow), ct);
 
         public Task<Order?> GetAsync(Guid id, CancellationToken ct) =>
             _db.Orders.AsNoTracking().FirstOrDefaultAsync(o => o.Id == id, ct);

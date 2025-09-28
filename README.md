@@ -89,8 +89,9 @@ Database files are stored on the host inside the `data/` directory (one subfolde
 ### 🐇 RabbitMQ & MassTransit Setup
 
 - Docker Compose spins up a dedicated `rabbitmq:3-management` container alongside the APIs.
-- `OrderService` publishes an `OrderCreatedEvent` (via MassTransit) whenever an order is persisted.
-- `ProductService` hosts a MassTransit consumer that listens for `OrderCreatedEvent` and decrements product stock.
+- `UserService` now emits a `UserCreatedEvent` whenever a new profile is stored.
+- `OrderService` publishes either `OrderCreatedEvent` (success) or `OrderFailedEvent` (e.g. insufficient stock) to orchestrate downstream workflows.
+- `ProductService` listens for `OrderCreatedEvent`, applies **idempotent** stock updates, and emits a `StockDecreasedEvent` once the inventory change succeeds.
 - Connection settings can be overridden via `RabbitMq__*` environment variables (see `appsettings.Development.json` for local defaults).
 
 ---
@@ -153,14 +154,22 @@ The **Order Service** now orchestrates synchronous validations via **REST APIs**
 - ✅ Fetches product details & stock from Product Service
 - ✅ Uses Polly policies (retry & circuit breaker) for resilience when calling external APIs
 
+## 🚀 Step 3: Advanced Events, Idempotency & Observability
+
+- ✅ **Event catalog expanded** → `UserCreatedEvent`, `OrderCreatedEvent`, `OrderFailedEvent`, and `StockDecreasedEvent` flow through RabbitMQ.
+- ✅ **Event IDs & deduplication** → every message carries an `EventId`; each service persists processed IDs to a dedicated `ProcessedEvents` table before acting, so re-delivery is safe.
+- ✅ **Serilog observability** → all services write structured logs to `Logs/info.log`, `Logs/warnings.log`, and `Logs/errors.log` while still streaming to the console.
+- 🔄 **Idempotent consumers** → Product Service checks the `ProcessedEvents` table before decreasing stock, preventing accidental double decrements.
+
 ## 🚀 Step 4: Event-Driven Choreography
 
 To remove tight coupling after an order is placed we introduced RabbitMQ + MassTransit:
 
-1. Order API saves the order and publishes an `OrderCreatedEvent`.
-2. Product Service consumes the event and decrements inventory.
-3. RabbitMQ keeps a durable queue so no order events are lost if Product Service is offline temporarily.
-4. You can watch the message flow via the management UI at http://localhost:15672.
+1. User API persists data and emits `UserCreatedEvent` so other services (e.g. newsletters) can react asynchronously.
+2. Order API saves the order (or rejects it) and publishes either `OrderCreatedEvent` or `OrderFailedEvent` with descriptive reasons.
+3. Product Service consumes order events, decrements inventory exactly once, and broadcasts `StockDecreasedEvent` for downstream systems (analytics, search, etc.).
+4. RabbitMQ keeps a durable queue so no order events are lost if Product Service is offline temporarily.
+5. You can watch the message flow via the management UI at http://localhost:15672.
 
 ### Future Topics
 - API Gateway (single entry point)
@@ -212,10 +221,17 @@ To remove tight coupling after an order is placed we introduced RabbitMQ + MassT
    ```
    The `stock` value should be reduced by the ordered quantity once the message is processed.
 
-5. **Inspect RabbitMQ (optional)**
-   - Navigate to http://localhost:15672
-   - Login with `guest` / `guest`
-   - Check the queue generated for `OrderCreatedConsumer` (kebab-case name) to confirm published/consumed messages.
+5. **Simulate an insufficient stock order**
+   - Reuse the same product but request a quantity greater than the remaining stock.
+   - Order Service returns HTTP 400 and publishes an `OrderFailedEvent` with the detailed reason.
+
+6. **Validate idempotency**
+   - In RabbitMQ's management UI, use the **Publish message** tab on the `order-created` queue to resend the previously processed payload **with the original `eventId`**.
+   - Product Service will detect the duplicate in `ProcessedEvents` and skip the stock change, logging the decision at `Information` level.
+
+7. **Inspect RabbitMQ & logs (optional)**
+   - Navigate to http://localhost:15672 and login with `guest` / `guest` to observe exchanges, queues, and message counters.
+   - Check each service's `Logs/` folder for `info.log`, `warnings.log`, and `errors.log` to see the Serilog outputs for the steps above.
 
 ---
 

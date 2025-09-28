@@ -5,11 +5,15 @@ using Microsoft.Extensions.Options;
 using OrderService.Data;
 using OrderService.External;
 using OrderService.Services;
-using System.Net;
 using Polly;
 using Polly.Extensions.Http;
+using Serilog;
+using Serilog.Events;
+using System.Net;
 
 var builder = WebApplication.CreateBuilder(args);
+
+ConfigureLogging(builder);
 
 // Controllers & JSON
 builder.Services.AddControllers().AddJsonOptions(o =>
@@ -96,3 +100,24 @@ context.Database.Migrate();
 
 app.MapControllers();
 app.Run();
+
+static void ConfigureLogging(WebApplicationBuilder builder)
+{
+    builder.Host.UseSerilog((context, services, configuration) =>
+    {
+        var logDirectory = Path.Combine(AppContext.BaseDirectory, "Logs");
+
+        configuration
+            .Enrich.FromLogContext()
+            .WriteTo.Console()
+            .WriteTo.Logger(lc => lc
+                .Filter.ByIncludingOnly(e => e.Level == LogEventLevel.Information)
+                .WriteTo.File(Path.Combine(logDirectory, "info.log"), rollingInterval: RollingInterval.Day, retainedFileCountLimit: 7))
+            .WriteTo.Logger(lc => lc
+                .Filter.ByIncludingOnly(e => e.Level == LogEventLevel.Warning)
+                .WriteTo.File(Path.Combine(logDirectory, "warnings.log"), rollingInterval: RollingInterval.Day, retainedFileCountLimit: 7))
+            .WriteTo.Logger(lc => lc
+                .Filter.ByIncludingOnly(e => e.Level >= LogEventLevel.Error)
+                .WriteTo.File(Path.Combine(logDirectory, "errors.log"), rollingInterval: RollingInterval.Day, retainedFileCountLimit: 7));
+    });
+}
