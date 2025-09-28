@@ -14,7 +14,12 @@ public class UserCreatedEventConsumer(IHubContext<NotificationHub> hubContext, I
 
     public async Task Consume(ConsumeContext<UserCreatedEvent> context)
     {
-        await _hubContext.Clients.All.SendAsync("UserCreated", context.Message, context.CancellationToken);
+        await _hubContext.Clients.All.SendAsync(
+            NotificationHub.BroadcastEventMethod,
+            nameof(UserCreatedEvent),
+            context.Message,
+            context.Message.CreatedAtUtc,
+            context.CancellationToken);
         _logger.LogInformation("Forwarded UserCreatedEvent for User {UserId} to connected clients.", context.Message.UserId);
     }
 }
