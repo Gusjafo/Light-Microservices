@@ -36,25 +36,33 @@ public class OrderCreatedConsumer(
 
         if (product is null)
         {
+            const string reason = "Product not found.";
             _logger.LogWarning(
                 "Product {ProductId} not found for order {OrderId}. Event ignored.",
                 message.ProductId,
                 message.Id);
             MarkEventAsProcessed(message.EventId);
             await _dbContext.SaveChangesAsync(context.CancellationToken);
+            await PublishFailureAsync(message, reason, 0, context.CancellationToken);
             return;
         }
 
         if (product.Stock < message.Quantity)
         {
+            var reason =
+                $"Insufficient stock. Available: {product.Stock}. Requested: {message.Quantity}.";
             _logger.LogWarning(
-                "Insufficient stock for product {ProductId}. Available {Available}, requested {Requested}. Applying best effort decrement.",
+                "Insufficient stock for product {ProductId}. Available {Available}, requested {Requested}.",
                 product.Id,
                 product.Stock,
                 message.Quantity);
+            MarkEventAsProcessed(message.EventId);
+            await _dbContext.SaveChangesAsync(context.CancellationToken);
+            await PublishFailureAsync(message, reason, product.Stock, context.CancellationToken);
+            return;
         }
 
-        product.Stock = Math.Max(0, product.Stock - message.Quantity);
+        product.Stock -= message.Quantity;
 
         MarkEventAsProcessed(message.EventId);
         await _dbContext.SaveChangesAsync(context.CancellationToken);
@@ -73,6 +81,28 @@ public class OrderCreatedConsumer(
             product.Id,
             message.Quantity,
             product.Stock);
+    }
+
+    private async Task PublishFailureAsync(
+        OrderCreatedEvent order,
+        string reason,
+        int availableStock,
+        CancellationToken cancellationToken)
+    {
+        await _publishEndpoint.Publish(new StockDecreaseFailedEvent(
+            Guid.NewGuid(),
+            order.Id,
+            order.ProductId,
+            order.Quantity,
+            availableStock,
+            reason,
+            DateTime.UtcNow),
+            cancellationToken);
+
+        _logger.LogWarning(
+            "Published StockDecreaseFailedEvent for order {OrderId}. Reason: {Reason}",
+            order.Id,
+            reason);
     }
 
     private void MarkEventAsProcessed(Guid eventId)

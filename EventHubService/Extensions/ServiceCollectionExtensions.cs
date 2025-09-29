@@ -16,6 +16,7 @@ public static class ServiceCollectionExtensions
         {
             busConfigurator.AddConsumer<OrderCreatedEventConsumer>();
             busConfigurator.AddConsumer<StockDecreasedEventConsumer>();
+            busConfigurator.AddConsumer<StockDecreaseFailedEventConsumer>();
             busConfigurator.AddConsumer<OrderFailedEventConsumer>();
             busConfigurator.AddConsumer<UserCreatedEventConsumer>();
 
