@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using EventHubService.Logging;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -12,6 +13,7 @@ namespace EventHubService.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class LogsController(LogFileOptions options, ILogger<LogsController> logger) : ControllerBase
 {
     private static readonly IReadOnlyDictionary<string, string> LevelFileNames =

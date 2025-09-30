@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { AuthService } from '../../services/auth.service';
 import { User, UserService } from '../../services/user.service';
 
 @Component({
@@ -13,16 +14,24 @@ export class UsersComponent implements OnInit {
   selectedUser?: User;
   userForm: FormGroup;
   isLoading = false;
+  readonly canManageUsers: boolean;
 
   constructor(
     private readonly userService: UserService,
     private readonly fb: FormBuilder,
-    private readonly snackBar: MatSnackBar
+    private readonly snackBar: MatSnackBar,
+    private readonly authService: AuthService
   ) {
     this.userForm = this.fb.group({
       name: ['', [Validators.required, Validators.maxLength(100)]],
       email: ['', [Validators.required, Validators.email]]
     });
+
+    this.canManageUsers = this.authService.hasRole('Admin');
+    if (!this.canManageUsers) {
+      this.displayedColumns = ['id', 'name', 'email'];
+      this.userForm.disable();
+    }
   }
 
   ngOnInit(): void {
@@ -44,16 +53,29 @@ export class UsersComponent implements OnInit {
   }
 
   selectUser(user: User): void {
+    if (!this.canManageUsers) {
+      return;
+    }
+
     this.selectedUser = user;
     this.userForm.patchValue(user);
   }
 
   resetForm(): void {
+    if (!this.canManageUsers) {
+      return;
+    }
+
     this.selectedUser = undefined;
     this.userForm.reset();
   }
 
   submit(): void {
+    if (!this.canManageUsers) {
+      this.snackBar.open('Permisos insuficientes para modificar usuarios.', 'Cerrar', { duration: 3000 });
+      return;
+    }
+
     if (this.userForm.invalid) {
       return;
     }
@@ -82,6 +104,11 @@ export class UsersComponent implements OnInit {
   }
 
   deleteUser(user: User): void {
+    if (!this.canManageUsers) {
+      this.snackBar.open('Permisos insuficientes para eliminar usuarios.', 'Cerrar', { duration: 3000 });
+      return;
+    }
+
     if (!confirm(`¿Eliminar usuario ${user.name}?`)) {
       return;
     }
