@@ -20,8 +20,6 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddOrderControllers();
 builder.Services.AddOrderDatabase(builder.Configuration);
-builder.Services.AddServiceEndpoints(builder.Configuration);
-builder.Services.AddResilientHttpClients();
 builder.Services.AddOrderApplicationServices();
 builder.Services.AddOrderMessaging(builder.Configuration);
 
