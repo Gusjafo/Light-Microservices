@@ -21,6 +21,9 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ConnectionStrings__Default=Data Source=/data/users.db
+      - Jwt__Issuer=LightMicroservices
+      - Jwt__Audience=LightMicroservicesClients
+      - Jwt__SecretKey=super-secret-development-key-please-change
     volumes:
       - ./data/user-service:/data
     ports:
@@ -38,6 +41,9 @@ services:
       - RabbitMq__VirtualHost=/
       - RabbitMq__Username=guest
       - RabbitMq__Password=guest
+      - Jwt__Issuer=LightMicroservices
+      - Jwt__Audience=LightMicroservicesClients
+      - Jwt__SecretKey=super-secret-development-key-please-change
     volumes:
       - ./data/product-service:/data
     ports:
@@ -60,6 +66,9 @@ services:
       - RabbitMq__VirtualHost=/
       - RabbitMq__Username=guest
       - RabbitMq__Password=guest
+      - Jwt__Issuer=LightMicroservices
+      - Jwt__Audience=LightMicroservicesClients
+      - Jwt__SecretKey=super-secret-development-key-please-change
     depends_on:
       user-service:
         condition: service_started
@@ -83,10 +92,27 @@ services:
       - RabbitMq__VirtualHost=/
       - RabbitMq__Username=guest
       - RabbitMq__Password=guest
+      - Jwt__Issuer=LightMicroservices
+      - Jwt__Audience=LightMicroservicesClients
+      - Jwt__SecretKey=super-secret-development-key-please-change
     depends_on:
       rabbitmq:
         condition: service_healthy
     ports:
       - "5007:80"
+
+  iam-service:
+    build:
+      context: .
+      dockerfile: IAMService/Dockerfile
+    container_name: iam-service
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - Jwt__Issuer=LightMicroservices
+      - Jwt__Audience=LightMicroservicesClients
+      - Jwt__SecretKey=super-secret-development-key-please-change
+      - Jwt__AccessTokenMinutes=120
+    ports:
+      - "5009:80"
 
 volumes: {}

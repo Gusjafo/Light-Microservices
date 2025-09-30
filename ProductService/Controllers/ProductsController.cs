@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProductService.Data;
@@ -10,6 +11,7 @@ namespace ProductService.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class ProductsController(ProductContext context) : ControllerBase
 {
     private readonly ProductContext _context = context;
@@ -40,6 +42,7 @@ public class ProductsController(ProductContext context) : ControllerBase
 
     // POST: api/products
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<Product>> CreateProduct(Product product, CancellationToken ct)
     {
         if (product.Id == Guid.Empty)
@@ -54,6 +57,7 @@ public class ProductsController(ProductContext context) : ControllerBase
 
     // PUT: api/products/{id}
     [HttpPut("{id:guid}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> UpdateProduct(Guid id, Product updatedProduct, CancellationToken ct)
     {
         var product = await _context.Products.FirstOrDefaultAsync(p => p.Id == id, ct);
@@ -70,6 +74,7 @@ public class ProductsController(ProductContext context) : ControllerBase
 
     // DELETE: api/products/{id}
     [HttpDelete("{id:guid}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> DeleteProduct(Guid id, CancellationToken ct)
     {
         var product = await _context.Products.FirstOrDefaultAsync(p => p.Id == id, ct);

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OrderService.Models;
 using OrderService.Services;
@@ -7,6 +8,7 @@ namespace OrderService.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class OrdersController(IOrderCreationService service) : ControllerBase
 {
     private readonly IOrderCreationService _service = service;
@@ -19,6 +21,7 @@ public class OrdersController(IOrderCreationService service) : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = "User,Admin")]
     public async Task<IActionResult> Create([FromBody] CreateOrderRequest req, CancellationToken ct)
     {
         var (ok, error, order) = await _service.CreateAsync(req.UserId, req.ProductId, req.Quantity, ct);

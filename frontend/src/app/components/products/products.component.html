@@ -1,5 +1,5 @@
 <div class="page-container">
-  <mat-card>
+  <mat-card *ngIf="canManageProducts; else readOnlyInfo">
     <mat-card-title>{{ selectedProduct ? 'Editar producto' : 'Crear producto' }}</mat-card-title>
     <mat-card-content>
       <form [formGroup]="productForm" (ngSubmit)="submit()" class="form-grid">
@@ -31,6 +31,14 @@
     </mat-card-content>
   </mat-card>
 
+  <ng-template #readOnlyInfo>
+    <mat-card class="read-only-banner">
+      <mat-card-content>
+        Acceso de solo lectura. Debes ser administrador para crear, actualizar o eliminar productos.
+      </mat-card-content>
+    </mat-card>
+  </ng-template>
+
   <mat-card>
     <mat-card-title>Productos</mat-card-title>
     <mat-card-content>
@@ -56,7 +64,7 @@
             <td mat-cell *matCellDef="let product">{{ product.stock }}</td>
           </ng-container>
 
-          <ng-container matColumnDef="actions">
+          <ng-container *ngIf="canManageProducts" matColumnDef="actions">
             <th mat-header-cell *matHeaderCellDef>Acciones</th>
             <td mat-cell *matCellDef="let product">
               <button mat-button color="accent" (click)="selectProduct(product)">Editar</button>

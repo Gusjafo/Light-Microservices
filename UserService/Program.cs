@@ -19,12 +19,15 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddControllers();
+builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.AddUserDatabase(builder.Configuration);
 builder.Services.AddUserMessaging(builder.Configuration);
 
 var app = builder.Build();
 
 app.UseCors(allowAngularPolicy);
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 app.ApplyMigrations<UserContext>();

@@ -19,12 +19,15 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddEventHubServices(builder.Configuration);
+builder.Services.AddJwtAuthentication(builder.Configuration);
 
 var app = builder.Build();
 
 app.UseCors(allowAngularPolicy);
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
-app.MapHub<NotificationHub>(NotificationHub.HubPath);
+app.MapHub<NotificationHub>(NotificationHub.HubPath).RequireAuthorization();
 
 app.Run();

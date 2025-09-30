@@ -1,16 +1,18 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { EventsViewerComponent } from './components/events-viewer/events-viewer.component';
+import { LoginComponent } from './components/login/login.component';
 import { LogsViewerComponent } from './components/logs-viewer/logs-viewer.component';
 import { OrdersComponent } from './components/orders/orders.component';
 import { ProductsComponent } from './components/products/products.component';
 import { UsersComponent } from './components/users/users.component';
+import { AuthInterceptor } from './services/auth.interceptor';
 
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatSidenavModule } from '@angular/material/sidenav';
@@ -34,6 +36,7 @@ import { MatDividerModule } from '@angular/material/divider';
     UsersComponent,
     ProductsComponent,
     OrdersComponent,
+    LoginComponent,
     LogsViewerComponent,
     EventsViewerComponent
   ],
@@ -60,7 +63,13 @@ import { MatDividerModule } from '@angular/material/divider';
     MatChipsModule,
     MatDividerModule
   ],
-  providers: [],
+  providers: [
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthInterceptor,
+      multi: true
+    }
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule {}
