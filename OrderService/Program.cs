@@ -22,10 +22,13 @@ builder.Services.AddOrderControllers();
 builder.Services.AddOrderDatabase(builder.Configuration);
 builder.Services.AddOrderApplicationServices();
 builder.Services.AddOrderMessaging(builder.Configuration);
+builder.Services.AddJwtAuthentication(builder.Configuration);
 
 var app = builder.Build();
 
 app.UseCors(allowAngularPolicy);
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 app.ApplyMigrations<OrderContext>();

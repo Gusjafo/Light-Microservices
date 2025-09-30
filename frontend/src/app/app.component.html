@@ -1,5 +1,5 @@
 <mat-sidenav-container class="app-shell">
-  <mat-sidenav mode="side" opened class="app-sidenav">
+  <mat-sidenav *ngIf="isAuthenticated" mode="side" opened class="app-sidenav">
     <div class="sidenav-header">
       <div class="brand-icon">
         <mat-icon>blur_on</mat-icon>
@@ -25,7 +25,7 @@
     </mat-nav-list>
   </mat-sidenav>
 
-  <mat-sidenav-content>
+  <mat-sidenav-content [class.no-sidenav]="!isAuthenticated">
     <mat-toolbar color="primary" class="app-toolbar">
       <div class="toolbar-title">
         <mat-icon>dashboard</mat-icon>
@@ -34,8 +34,25 @@
           <span class="subtitle">Panel de microservicios</span>
         </div>
       </div>
+      <span class="spacer"></span>
+      <ng-container *ngIf="isAuthenticated; else loginAction">
+        <div class="auth-info">
+          <div class="user-details">
+            <span class="user-email">{{ userEmail }}</span>
+            <mat-chip-set *ngIf="userRoles.length > 0" aria-label="Roles del usuario" class="role-chips">
+              <mat-chip *ngFor="let role of userRoles" color="accent" selected>
+                {{ role }}
+              </mat-chip>
+            </mat-chip-set>
+          </div>
+          <button mat-stroked-button color="accent" (click)="logout()">Cerrar sesión</button>
+        </div>
+      </ng-container>
+      <ng-template #loginAction>
+        <button mat-flat-button color="accent" routerLink="/login">Iniciar sesión</button>
+      </ng-template>
     </mat-toolbar>
-    <main class="app-content">
+    <main class="app-content" [class.centered-content]="!isAuthenticated">
       <router-outlet></router-outlet>
     </main>
   </mat-sidenav-content>

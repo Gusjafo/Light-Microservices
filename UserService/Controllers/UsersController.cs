@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using Contracts.Events;
 using MassTransit;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -13,6 +14,7 @@ namespace UserService.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class UsersController(UserContext context, IPublishEndpoint publishEndpoint, ILogger<UsersController> logger) : ControllerBase
 {
     private readonly UserContext _context = context;
@@ -45,6 +47,7 @@ public class UsersController(UserContext context, IPublishEndpoint publishEndpoi
 
     // POST: api/users
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<User>> CreateUser(User user, CancellationToken ct)
     {
         if (user.Id == Guid.Empty)
@@ -69,6 +72,7 @@ public class UsersController(UserContext context, IPublishEndpoint publishEndpoi
 
     // PUT: api/users/{id}
     [HttpPut("{id:guid}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> UpdateUser(Guid id, User updatedUser, CancellationToken ct)
     {
         var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == id, ct);
@@ -86,6 +90,7 @@ public class UsersController(UserContext context, IPublishEndpoint publishEndpoi
 
     // DELETE: api/users/{id}
     [HttpDelete("{id:guid}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> DeleteUser(Guid id, CancellationToken ct)
     {
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == id, ct);

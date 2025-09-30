@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { AuthService } from '../../services/auth.service';
 import { Product, ProductService } from '../../services/product.service';
 
 @Component({
@@ -13,17 +14,25 @@ export class ProductsComponent implements OnInit {
   selectedProduct?: Product;
   productForm: FormGroup;
   isLoading = false;
+  readonly canManageProducts: boolean;
 
   constructor(
     private readonly productService: ProductService,
     private readonly fb: FormBuilder,
-    private readonly snackBar: MatSnackBar
+    private readonly snackBar: MatSnackBar,
+    private readonly authService: AuthService
   ) {
     this.productForm = this.fb.group({
       name: ['', [Validators.required, Validators.maxLength(100)]],
       price: [0, [Validators.required, Validators.min(0)]],
       stock: [0, [Validators.required, Validators.min(0)]]
     });
+
+    this.canManageProducts = this.authService.hasRole('Admin');
+    if (!this.canManageProducts) {
+      this.displayedColumns = ['id', 'name', 'price', 'stock'];
+      this.productForm.disable();
+    }
   }
 
   ngOnInit(): void {
@@ -45,6 +54,10 @@ export class ProductsComponent implements OnInit {
   }
 
   selectProduct(product: Product): void {
+    if (!this.canManageProducts) {
+      return;
+    }
+
     this.selectedProduct = product;
     this.productForm.patchValue({
       name: product.name,
@@ -54,11 +67,20 @@ export class ProductsComponent implements OnInit {
   }
 
   resetForm(): void {
+    if (!this.canManageProducts) {
+      return;
+    }
+
     this.selectedProduct = undefined;
     this.productForm.reset({ price: 0, stock: 0 });
   }
 
   submit(): void {
+    if (!this.canManageProducts) {
+      this.snackBar.open('Permisos insuficientes para modificar productos.', 'Cerrar', { duration: 3000 });
+      return;
+    }
+
     if (this.productForm.invalid) {
       return;
     }
@@ -87,6 +109,11 @@ export class ProductsComponent implements OnInit {
   }
 
   deleteProduct(product: Product): void {
+    if (!this.canManageProducts) {
+      this.snackBar.open('Permisos insuficientes para eliminar productos.', 'Cerrar', { duration: 3000 });
+      return;
+    }
+
     if (!confirm(`¿Eliminar producto ${product.name}?`)) {
       return;
     }

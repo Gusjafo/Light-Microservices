@@ -2,6 +2,7 @@ import { Injectable, NgZone } from '@angular/core';
 import { HubConnection, HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { AuthService } from './auth.service';
 
 export interface IntegrationEvent {
   eventType: string;
@@ -18,15 +19,23 @@ export class EventService {
   readonly events$: Observable<IntegrationEvent[]> = this.eventsSubject.asObservable();
   readonly isConnected$: Observable<boolean> = this.isConnectedSubject.asObservable();
 
-  constructor(private readonly zone: NgZone) {}
+  constructor(private readonly zone: NgZone, private readonly authService: AuthService) {}
 
   connect(): void {
     if (this.hubConnection) {
       return;
     }
 
+    const token = this.authService.token;
+    if (!token) {
+      console.warn('Intento de conexión a SignalR sin token de acceso.');
+      return;
+    }
+
     this.hubConnection = new HubConnectionBuilder()
-      .withUrl(environment.signalRHubUrl)
+      .withUrl(environment.signalRHubUrl, {
+        accessTokenFactory: () => this.authService.token ?? ''
+      })
       .withAutomaticReconnect()
       .configureLogging(LogLevel.Information)
       .build();
