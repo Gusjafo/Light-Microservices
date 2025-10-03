@@ -1,5 +1,6 @@
 using System;
 using System.Text;
+using EventHubService.Hubs;
 using EventHubService.Options;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
@@ -38,6 +39,22 @@ public static class AuthenticationExtensions
                     IssuerSigningKey = key,
                     ClockSkew = TimeSpan.FromMinutes(1),
                     RoleClaimType = "role"
+                };
+
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var accessToken = context.Request.Query["access_token"];
+
+                        if (!string.IsNullOrEmpty(accessToken) &&
+                            context.HttpContext.Request.Path.StartsWithSegments(NotificationHub.HubPath))
+                        {
+                            context.Token = accessToken;
+                        }
+
+                        return System.Threading.Tasks.Task.CompletedTask;
+                    }
                 };
             });
 
