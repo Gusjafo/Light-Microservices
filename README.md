@@ -159,6 +159,11 @@ docker compose up --build
 - `ProductService` listens for `OrderCreatedEvent`, applies **idempotent** stock updates, and emits a `StockDecreasedEvent` once the inventory change succeeds.
 - Connection settings can be overridden via `RabbitMq__*` environment variables (see each service’s `appsettings.Development.json` for local defaults).
 
+### 🐳 Running only RabbitMQ & MassTransit
+
+```bash
+docker compose up rabbitmq -d
+```
 ---
 
 ## 🔎 Service Endpoints
